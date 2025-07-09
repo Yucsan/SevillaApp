@@ -24,7 +24,7 @@ export const places = [
     lat: 37.3771,
     lng: -5.9869,
     descripcion: 'Plaza monumental con canales, azulejos y parques.',
-    imagen: require('@/assets/images/plaza-espana.jpg'),
+    imagen: require('@/assets/images/plazaespana.jpg'),
   },
   {
     id: 'museo-bellas-artes',
@@ -33,7 +33,7 @@ export const places = [
     lat: 37.3935,
     lng: -5.9956,
     descripcion: 'Museo con pinturas del barroco sevillano.',
-    imagen: require('@/assets/images/museo.jpg'),
+    imagen: require('@/assets/images/bellasartes.jpg'),
   },
   {
     id: 'metropol-parasol',
