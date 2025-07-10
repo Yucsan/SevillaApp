@@ -1,7 +1,17 @@
+import type { Place } from '@/constants/mockData'; // Asegúrate de importar el tipo
 import { places } from '@/constants/mockData'; // o donde tengas ese array
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Image,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 export default function CategoryScreen() {
   const { category } = useLocalSearchParams();
@@ -18,6 +28,28 @@ export default function CategoryScreen() {
     (place) => place.categoria === category
   );
 
+  // ✅ Función para abrir alerta y Google Maps
+  const mostrarAlertaLugar = (lugar: Place) => {
+    Alert.alert(
+      lugar.nombre,
+      lugar.descripcion,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Ir con Google Maps',
+          onPress: () => {
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${lugar.lat},${lugar.lng}`;
+            Linking.openURL(url);
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
@@ -31,13 +63,17 @@ export default function CategoryScreen() {
         data={lugaresFiltrados}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={item.imagen} style={styles.image} />
-            <View style={styles.info}>
-              <Text style={styles.name}>{item.nombre}</Text>
-              <Text>{item.descripcion}</Text>
+
+          <Pressable onPress={() => mostrarAlertaLugar(item)}>
+            <View style={styles.card}>
+              <Image source={item.imagen} style={styles.image} />
+              <View style={styles.info}>
+                <Text style={styles.name}>{item.nombre}</Text>
+                <Text>{item.descripcion}</Text>
+              </View>
             </View>
-          </View>
+          </Pressable>
+
         )}
       />
     </View>

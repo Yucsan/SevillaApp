@@ -18,6 +18,7 @@ export default function ExploreScreen() {
         <Pressable
           key={cat.nombre}
           style={styles.button}
+          
           onPress={() =>
             router.push({
               pathname: "/categories/[category]",

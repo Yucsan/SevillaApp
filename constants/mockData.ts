@@ -1,3 +1,13 @@
+export type Place = {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  categoria: string;
+  lat: number;
+  lng: number;
+  imagen: any; // o ImageSourcePropType si prefieres más estricto
+};
+
 export const places = [
   {
     id: 'catedral',
