@@ -1,21 +1,43 @@
 import type { Place } from '@/constants/mockData'; // Asegúrate de importar el tipo
 import { places } from '@/constants/mockData'; // o donde tengas ese array
+
+import { useState } from 'react';
+import { Button, Dialog, Text as PaperText, Portal } from 'react-native-paper';
+
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import {
-  Alert,
   FlatList,
   Image,
   Linking,
   Pressable,
   StyleSheet,
   Text,
-  View,
+  View
 } from 'react-native';
 
 export default function CategoryScreen() {
   const { category } = useLocalSearchParams();
   const navigation = useNavigation();
+
+// 🟡 Estado para el Dialog de Paper
+  const [visible, setVisible] = useState(false);
+  const [lugarSeleccionado, setLugarSeleccionado] = useState<Place | null>(null);
+
+  const mostrarDialogo = (lugar: Place) => {
+    setLugarSeleccionado(lugar);
+    setVisible(true);
+  };
+
+  const cerrarDialogo = () => {
+    setVisible(false);
+  };
+
+  const abrirEnGoogleMaps = (lat: number, lng: number) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    Linking.openURL(url);
+  };
+
 
   // ✅ Cambiar el título del header dinámicamente
   useLayoutEffect(() => {
@@ -28,32 +50,10 @@ export default function CategoryScreen() {
     (place) => place.categoria === category
   );
 
-  // ✅ Función para abrir alerta y Google Maps
-  const mostrarAlertaLugar = (lugar: Place) => {
-    Alert.alert(
-      lugar.nombre,
-      lugar.descripcion,
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Ir con Google Maps',
-          onPress: () => {
-            const url = `https://www.google.com/maps/dir/?api=1&destination=${lugar.lat},${lugar.lng}`;
-            Linking.openURL(url);
-          },
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
-        Lugares de{" "}
+        Lugares de{' '}
         <Text style={styles.categoryName}>
           {String(category).charAt(0).toUpperCase() + String(category).slice(1)}
         </Text>
@@ -63,8 +63,7 @@ export default function CategoryScreen() {
         data={lugaresFiltrados}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-
-          <Pressable onPress={() => mostrarAlertaLugar(item)}>
+          <Pressable onPress={() => mostrarDialogo(item)}>
             <View style={styles.card}>
               <Image source={item.imagen} style={styles.image} />
               <View style={styles.info}>
@@ -73,9 +72,32 @@ export default function CategoryScreen() {
               </View>
             </View>
           </Pressable>
-
         )}
       />
+
+      {/* ✅ Diálogo de Paper */}
+      <Portal>
+        <Dialog visible={visible} onDismiss={cerrarDialogo}>
+          <Dialog.Title>{lugarSeleccionado?.nombre}</Dialog.Title>
+          <Dialog.Content>
+            <PaperText>{lugarSeleccionado?.descripcion}</PaperText>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={cerrarDialogo}>Cerrar</Button>
+            <Button
+              onPress={() => {
+                if (lugarSeleccionado) {
+                  abrirEnGoogleMaps(lugarSeleccionado.lat, lugarSeleccionado.lng);
+                  cerrarDialogo();
+                }
+              }}
+              icon="map-marker"
+            >
+              Ir al lugar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }
