@@ -38,7 +38,6 @@ export default function CategoryScreen() {
     Linking.openURL(url);
   };
 
-
   // ✅ Cambiar el título del header dinámicamente
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -76,28 +75,61 @@ export default function CategoryScreen() {
       />
 
       {/* ✅ Diálogo de Paper */}
-      <Portal>
-        <Dialog visible={visible} onDismiss={cerrarDialogo}>
-          <Dialog.Title>{lugarSeleccionado?.nombre}</Dialog.Title>
-          <Dialog.Content>
-            <PaperText>{lugarSeleccionado?.descripcion}</PaperText>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={cerrarDialogo}>Cerrar</Button>
-            <Button
-              onPress={() => {
-                if (lugarSeleccionado) {
-                  abrirEnGoogleMaps(lugarSeleccionado.lat, lugarSeleccionado.lng);
-                  cerrarDialogo();
-                }
-              }}
-              icon="map-marker"
-            >
-              Ir al lugar
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+<Portal>
+  <Dialog visible={visible} onDismiss={cerrarDialogo}>
+    <Dialog.Title>{lugarSeleccionado?.nombre}</Dialog.Title>
+
+    <Dialog.Content>
+
+   {lugarSeleccionado?.imagen && (
+    <>
+      <View style={dialogStyles.imageWrapper}>
+        <Image
+          source={lugarSeleccionado?.imagen}
+          style={dialogStyles.image}
+          resizeMode="cover"
+        />
+      </View>
+
+      <PaperText>{lugarSeleccionado?.descripcion}</PaperText>
+
+      {lugarSeleccionado && (
+        <>
+          {[
+            { icon: '📍', label: 'Dirección', value: lugarSeleccionado.direccion },
+            { icon: '⭐', label: 'Rating', value: lugarSeleccionado.rating },
+            { icon: '🗣', label: 'Opiniones', value: lugarSeleccionado.opiniones },
+            { icon: '⏰', label: 'Abierto ahora', value: lugarSeleccionado.abierto ? 'Sí' : 'No' },
+            { icon: '📌', label: 'Estado', value: lugarSeleccionado.estado },
+            { icon: '🏷️', label: 'Tipos', value: lugarSeleccionado.tipos.join(', ') },
+          ].map((item) => (
+            <PaperText key={item.label} style={dialogStyles.infoLine}>
+              {item.icon} {item.label}: {item.value}
+            </PaperText>
+          ))}
+        </>
+      )}
+    </>
+   )}
+
+    </Dialog.Content>
+    <Dialog.Actions>
+      <Button onPress={cerrarDialogo}>Cerrar</Button>
+      <Button
+        icon="navigation"
+        onPress={() => {
+          if (lugarSeleccionado) {
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${lugarSeleccionado.lat},${lugarSeleccionado.lng}`;
+            Linking.openURL(url);
+          }
+        }}
+      >
+        Ir con Google Maps
+      </Button>
+    </Dialog.Actions>
+  </Dialog>
+</Portal>
+
     </View>
   );
 }
@@ -119,4 +151,19 @@ const styles = StyleSheet.create({
   categoryName: {
   color: '#c42e2e', // o el color que prefieras
 },
+});
+
+const dialogStyles = StyleSheet.create({
+  imageWrapper: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  image: {
+    width: '98%',
+    height: 180,
+    marginBottom: 12,
+  },
+  infoLine: {
+    marginBottom: 6,
+  },
 });
